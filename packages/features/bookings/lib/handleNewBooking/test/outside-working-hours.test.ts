@@ -1,7 +1,6 @@
 import {
   createBookingScenario,
   getBooker,
-  getDate,
   getOrganizer,
   getScenarioData,
   TestData,
@@ -17,6 +16,11 @@ import { getNewBookingHandler } from "./getNewBookingHandler";
 
 // Local test runs sometime gets too slow
 const timeout: number = process.env.CI ? 5000 : 20000;
+
+// getDate() uses the runner's local date, so on runners west of UTC late in the evening
+// "tomorrow at 05:00 UTC" can already be in the past. The slots below are UTC, so derive the date in UTC.
+const getTomorrowUtcDateString = (): string =>
+  new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 // Regression coverage for https://github.com/calcom/cal.diy/issues/12092:
 // API callers can send any start/end, so the booking service itself must reject
@@ -87,7 +91,7 @@ describe("handleNewBooking", () => {
       async () => {
         const handleNewBooking = getNewBookingHandler();
         const { booker } = await setUpOrganizerWithIstWorkHours();
-        const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
+        const plus1DateString = getTomorrowUtcDateString();
 
         const mockBookingData = getBookingDataFor({
           booker,
@@ -110,7 +114,7 @@ describe("handleNewBooking", () => {
       async () => {
         const handleNewBooking = getNewBookingHandler();
         const { booker } = await setUpOrganizerWithIstWorkHours();
-        const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
+        const plus1DateString = getTomorrowUtcDateString();
 
         const mockBookingData = getBookingDataFor({
           booker,
@@ -134,7 +138,7 @@ describe("handleNewBooking", () => {
       async () => {
         const handleNewBooking = getNewBookingHandler();
         const { booker } = await setUpOrganizerWithIstWorkHours();
-        const { dateString: plus1DateString } = getDate({ dateIncrement: 1 });
+        const plus1DateString = getTomorrowUtcDateString();
 
         const mockBookingData = getBookingDataFor({
           booker,
